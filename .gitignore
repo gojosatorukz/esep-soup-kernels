@@ -1,0 +1,17 @@
+data/
+runs/
+runs_*/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+*.m4a
+*.mp4
+*token*
+*secret*

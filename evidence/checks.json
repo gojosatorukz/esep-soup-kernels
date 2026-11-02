@@ -1,0 +1,57 @@
+{
+  "result_sha256": "a25a2b6c1141e04edfb97ea5d7963f3cca7f4bf2a7852899c208da453f1200de",
+  "solution_sha256": "6f57c4273fac3d5c40d0a5ce9cd0c878d799911fa17b806b48762dce7a0eee97",
+  "checks": [
+    {
+      "check": "1. every base and solution run finished",
+      "ok": true,
+      "detail": "2 base and 2 solution runs of 2 each"
+    },
+    {
+      "check": "2. no ready-made kernel libraries",
+      "ok": true,
+      "detail": "loaded: none; imported in solution/: none; packages changed during the run: none"
+    },
+    {
+      "check": "3. own @triton.jit kernels in solution/ run in training",
+      "ok": true,
+      "detail": "_add_rmsnorm_bwd (solution/body/norm_rope.py), _add_rmsnorm_fwd (solution/body/norm_rope.py), _rope_kernel (solution/body/norm_rope.py), head_row_softmax_kernel (solution/head/kernels.py), lora_dropout_bwd_kernel (solution/body/lora.py), lora_dropout_fwd_kernel (solution/body/lora.py), nf4_dequant_kernel (solution/nf4/dequant.py), nf4_dequant_multi_kernel (solution/nf4/dequant.py); not launched in every solution run: _drop_bwd_quarter, _drop_quarter, _rotate_heads; the example's kernels do not count, under any name: example_swiglu_fwd_kernel, example_swiglu_bwd_kernel"
+    },
+    {
+      "check": "4. own kernels together take >= 5% of the training time",
+      "ok": true,
+      "detail": "10.8% of the training time (lowest of 2 runs, steps 3+)"
+    },
+    {
+      "check": "5. same task and Soup outputs (steps, adapter, settings, tokens, metrics, rewind)",
+      "ok": true,
+      "detail": "identical within tolerance"
+    },
+    {
+      "check": "6. loss curve follows the base",
+      "ok": true,
+      "detail": "base_2: first step 0.00%, mean of all steps 0.01%; solution_1: first step 0.01%, mean of all steps 0.05%; solution_2: first step 0.01%, mean of all steps 0.05% (max 1% and 3%)"
+    },
+    {
+      "check": "7. quality: eval loss at most 0.5% above the base",
+      "ok": true,
+      "detail": "-0.006%"
+    },
+    {
+      "check": "8. not worse than the base on time or memory (10% margin)",
+      "ok": true,
+      "detail": "time x0.584, memory x0.143 of the base"
+    },
+    {
+      "check": "9. clean measurement (a T4, idle GPUs, one GPU, harness allocator, peaks agree)",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "check": "10. Soup regression tests with your patches",
+      "ok": true,
+      "detail": "79 passed, 14 warnings in 0.23s"
+    }
+  ],
+  "notes": []
+}

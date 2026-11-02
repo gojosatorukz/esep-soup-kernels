@@ -6,6 +6,15 @@ Custom Triton kernels and memory-aware execution for **Soup 0.77.0 + Qwen2.5-1.5
 
 [Watch the 2:51 demo](https://youtu.be/fWcVOOLVn7E) · [Original executed Kaggle notebook](https://www.kaggle.com/code/datamata2/esep-safe6-final?scriptVersionId=364278304) · [Portfolio reproduction notebook](notebooks/reproduce.ipynb)
 
+The baseline nearly fills a free 15 GiB T4. This project reduces intermediate tensors and GPU memory traffic while retaining the same model, training steps and adapter outputs.
+
+## Contributions
+
+| Team member | Contribution |
+|---|---|
+| **Bekzat Rashiduly** | Team captain; problem/solution framing, demo narration and delivery, presentation and pitch. |
+| **Baltabay Zhanybek** | ML/AI engineering; kernel implementation, optimization and GPU validation. |
+
 ## Measured results
 
 | Metric | Baseline Soup | Esep safe-6 |
@@ -42,16 +51,22 @@ Requires **Linux + NVIDIA CUDA**, Internet, and sufficient GPU memory for the ba
 2. Select **GPU T4 x2**, enable **Internet**, and start a fresh session. Kaggle may require account phone verification; training uses only GPU 0.
 3. Choose **Save Version → Save & Run All**. The public repository clone needs no GitHub token. Outputs are saved in `/kaggle/working/esep-soup-kernels/runs/`.
 
+The notebook checks the system before installing packages, selects PyTorch's CUDA 12.8 build, checks dependencies, and verifies the runtime source before and after execution. It uses the fixed portfolio release `v1.0.0`.
+
 **Validation status:** the runtime source files match the measured safe-6 bytes. The portfolio notebook changes repository access and packaging; it has been syntax-checked but has not received a fresh GPU validation. For executed historical evidence, use the saved notebook linked above. That historical notebook still points at the original organizer repository.
 
 ### Linux / CUDA terminal
 
 ```bash
-git clone https://github.com/gojosatorukz/esep-soup-kernels.git
+git clone --branch v1.0.0 --depth 1 https://github.com/gojosatorukz/esep-soup-kernels.git
 cd esep-soup-kernels
-python -m venv .venv
+python3.13 -m venv .venv
 source .venv/bin/activate
+python scripts/preflight.py --system-only
+python -m pip install "torch==2.11.0" --index-url https://download.pytorch.org/whl/cu128
 python -m pip install -r requirements.txt
+python -m pip check
+python scripts/preflight.py
 python scripts/verify_source.py
 python task/prepare_data.py
 python -m pytest solution -q
@@ -63,6 +78,17 @@ python harness/score.py runs/result.json
 
 Keep other GPU workloads stopped during measurement. The harness downloads the public dataset and model. No dataset, model weights, trained adapter or compiled cache is bundled.
 
+The explicit CUDA wheel selection follows the [official PyTorch 2.11 installation instructions](https://pytorch.org/get-started/previous-versions/#v2110). Use a fresh virtual environment or Kaggle session rather than an environment with preloaded incompatible packages.
+
+### Inspect the saved evidence without a GPU
+
+```bash
+python3 scripts/verify_source.py
+python3 harness/score.py evidence/result.json
+```
+
+These commands verify the recorded source and display the recorded ratios; they do not train a model or generate a new result. Full tests and training require the GPU environment above. Contest points depend on other admitted solutions and are not a portfolio performance metric.
+
 ## Scope and limitations
 
 - Fixed workload: Qwen2.5-1.5B-Instruct, NF4 double quantization, fp16, LoRA r=16 / alpha=32 / dropout=0.05 on q/v projections, batch 4, sequence length ≤512, 256 Kazakh instructions, 64 steps.
@@ -71,10 +97,7 @@ Keep other GPU workloads stopped during measurement. The harness downloads the p
 - Recomputing activations trades compute for memory. Separate ablation measurements were not completed.
 - This is a post-hackathon portfolio snapshot. It does not change the frozen contest submission.
 
-## Team and attribution
-
-**Bekzat Rashiduly** — team captain; problem/solution framing, demo production, presentation and pitch.  
-**Baltabay Zhanybek** — ML/AI engineering; kernel implementation, optimization and GPU validation.
+## Provenance and attribution
 
 Runtime implementation is preserved from safe-6 commit `389940d4710277e15444de1d89d1d35bbbe41403`. Portfolio documentation and public-access notebook were prepared after the event.
 
